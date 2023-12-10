@@ -1,16 +1,14 @@
 #!/usr/bin/python3
-"""
-this the Module for Amenity class.
-"""
 from models.base_model import BaseModel
+"""
+the Module class: Amenity
+"""
 
 
 class Amenity(BaseModel):
-    """
-    Represents amenity.
-
-    Attributes:
-        name (str): name of the amenity.
-    """
-
+    """the definition for class Amenity"""
     name = ""
+
+    def __init__(self, *args, **kwargs):
+        """ the constructor method """
+        super().__init__(self, *args, **kwargs)

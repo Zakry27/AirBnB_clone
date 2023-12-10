@@ -1,75 +1,78 @@
 #!/usr/bin/python3
 """
-this is the Module for BaseModel class.
+the Module base_model
+this Contains Class that defines all common attributes or
+methods for other classes
 """
-import uuid
+from uuid import uuid4
 from datetime import datetime
-import models
+from models import storage
+import uuid
+import json
+import sys
+import os.path
 
 
-class BaseModel:
+class BaseModel():
+    ''' base class for other classes '''
+
     def __init__(self, *args, **kwargs):
-        time_format = "%Y-%m-%dT%H:%M:%S.%f"
-        self.id = str(uuid.uuid4())
-        self.created_at = datetime.utcnow()
-        self.updated_at = datetime.utcnow()
-        
+        '''
+        initializes values
+        '''
         if kwargs:
-            for key, value in kwargs.items():
-                if key == "__class__":
-                    continue
-                elif key == "created_at" or key == "updated_at":
-                    setattr(self, key, datetime.strptime(value, time_format))
-                else:
-                    setattr(self, key, value)
-
-        models.storage.new(self)
-
-    def save(self):
-        """
-
-        """
-        self.updated_at = datetime.utcnow()
-        models.storage.save()
-
-    def to_dict(self):
-        """
-
-        """
-        inst_dict = self.__dict__.copy()
-        inst_dict["__class__"] = self.__class__.__name__
-        inst_dict["created_at"] = self.created_at.isoformat()
-        inst_dict["updated_at"] = self.updated_at.isoformat()
-
-        return inst_dict
+            dtf = '%Y-%m-%dT%H:%M:%S.%f'
+            k_dict = kwargs.copy()
+            del k_dict["__class__"]
+            for key in k_dict:
+                if ("created_at" == key or "updated_at" == key):
+                    k_dict[key] = datetime.strptime(k_dict[key], dtf)
+            self.__dict__ = k_dict
+        else:
+            self.id = str(uuid4())
+            self.created_at = datetime.now()
+            self.updated_at = datetime.now()
+            storage.new(self)
 
     def __str__(self):
-        """
+        '''
+        print in "[<class name>] (<self.id>) <self.__dict__>" format
+        '''
+        return ('[{}] ({}) {}'.format(
+            self.__class__.__name__,
+            self.id,
+            self.__class__.__dict__))
 
-        """
-        class_name = self.__class__.__name__
-        return "[{}] ({}) {}".format(class_name, self.id, self.__dict__)
+    def save(self):
+        '''
+        updates public instance attribute updated_at
+        with current datetime
+        '''
+        self.updated_at = datetime.now()
+        storage.save()
 
+    def to_dict(self):
+        '''
+        returns dictionary containing all keysvalues
+        of __dict__ of instance
+        '''
+        dic = {}
+        dic["__class__"] = self.__class__.__name__
+        for k, v in self.__dict__.items():
+            if isinstance(v, (datetime, )):
+                dic[k] = v.isoformat()
+            else:
+                dic[k] = v
+        return dic
 
-if __name__ == "__main__":
-    my_model = BaseModel()
-    my_model.name = "My_First_Model"
-    my_model.my_number = 89
-    print(my_model.id)
-    print(my_model)
-    print(type(my_model.created_at))
-    print("--")
-    my_model_json = my_model.to_dict()
-    print(my_model_json)
-    print("JSON of my_model:")
-    for key in my_model_json.keys():
-        print("\t{}: ({}) - {}".format(key, type(my_model_json[key]), my_model_json[key]))
-
-    print("--")
-    my_new_model = BaseModel(**my_model_json)
-    print(my_new_model.id)
-    print(my_new_model)
-    print(type(my_new_model.created_at))
-
-    print("--")
-    print(my_model is my_new_model)
+    def to_json(self):
+        '''
+        returns json containing all keysvalues
+        of __dict__ of instance
+        '''
+        my_json = self.__dict__.copy()
+        my_json.update({'created_at': self.created_at.strftime(self.dtf)})
+        my_json.update({'__class__': str(self.__class__.__name__)})
+        if hasattr(self, 'updated_at'):
+            my_json.update({'updated_at': self.updated_at.strftime(self.dtf)})
+        return my_json

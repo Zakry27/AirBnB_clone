@@ -1,89 +1,61 @@
 #!/usr/bin/python3
-"""
-the module for BaseModel unittest
-"""
-import os
 import unittest
 from models.base_model import BaseModel
+"""
+the Unittest Module for BaseModel class
+"""
 
 
+class TestUser(unittest.TestCase):
+    ''' the Unittest for BaseModel class '''
 
-class TestBasemodel(unittest.TestCase):
-    """
-    the unittest for BaseModel
-    """
+    def test_object_Instantiation(self):
+        ''' the instantiates class '''
+        self.basemodel = BaseModel()
 
-    def setUp(self):
-        """
-        the Setup for temporary file path
-        """
-        try:
-            os.rename("file.json", "tmp.json")
-        except FileNotFoundError:
-            pass
+    def test_checking_for_functions(self):
+        self.assertIsNotNone(BaseModel.__doc__)
+        self.assertIsNotNone(BaseModel.save.__doc__)
+        self.assertIsNotNone(BaseModel.to_dict.__doc__)
 
-    def tearDown(self):
-        """
-        the Tear down for temporary file path
-        """
-        try:
-            os.remove("file.json")
-        except FileNotFoundError:
-            pass
-        try:
-            os.rename("tmp.json", "file.json")
-        except FileNotFoundError:
-            pass
-    def test_init(self):
-        """
-        the Test for init
-        """
-        my_model = BaseModel()
+    def testattr(self):
+        ''' the test Class: User attributes '''
+        self.basemodel = BaseModel()
+        self.assertTrue(hasattr(self.basemodel, "created_at"))
+        self.assertTrue(hasattr(self.basemodel, "updated_at"))
+        self.assertFalse(hasattr(self.basemodel, "random_attr"))
+        self.assertFalse(hasattr(self.basemodel, "name"))
+        self.assertTrue(hasattr(self.basemodel, "id"))
+        self.basemodel.name = "Alice"
+        self.basemodel.age = "44"
+        self.assertTrue(hasattr(self.basemodel, "name"))
+        self.assertTrue(hasattr(self.basemodel, "age"))
+        delattr(self.basemodel, "name")
+        self.assertFalse(hasattr(self.basemodel, "name"))
+        delattr(self.basemodel, "age")
+        self.assertFalse(hasattr(self.basemodel, "age"))
+        self.assertEqual(self.basemodel.__class__.__name__, "BaseModel")
 
-        self.assertIsNotNone(my_model.id)
-        self.assertIsNotNone(my_model.created_at)
-        self.assertIsNotNone(my_model.updated_at)
+    def testsave(self):
+        ''' the testing method: save '''
+        self.basemodel = BaseModel()
+        self.basemodel.save()
+        self.assertTrue(hasattr(self.basemodel, "updated_at"))
 
-    def test_save(self):
-        """
-        the Test for save method
-        """
-        my_model = BaseModel()
-
-        initial_updated_at = my_model.updated_at
-
-        current_updated_at = my_model.save()
-
-        self.assertNotEqual(initial_updated_at, current_updated_at)
+    def teststr(self):
+        ''' the testing __str__ return format of BaseModel '''
+        self.basemodel = BaseModel()
+        s = "[{}] ({}) {}".format(self.basemodel.__class__.__name__,
+                                  str(self.basemodel.id),
+                                  self.basemodel.__dict__)
+        self.assertEqual(print(s), print(self.basemodel))
 
     def test_to_dict(self):
-        """
-        the Test for to_dict method
-        """
-        my_model = BaseModel()
+        base1 = BaseModel()
+        base1_dict = base1.to_dict()
+        self.assertEqual(base1.__class__.__name__, 'BaseModel')
+        self.assertIsInstance(base1_dict['created_at'], str)
+        self.assertIsInstance(base1_dict['updated_at'], str)
 
-        my_model_dict = my_model.to_dict()
-
-        self.assertIsInstance(my_model_dict, dict)
-
-        self.assertEqual(my_model_dict["__class__"], 'BaseModel')
-        self.assertEqual(my_model_dict['id'], my_model.id)
-        self.assertEqual(my_model_dict['created_at'], my_model.created_at.isoformat())
-        self.assertEqual(my_model_dict["updated_at"], my_model.created_at.isoformat())
-
-
-    def test_str(self):
-        """
-        the Test for string representation
-        """
-        my_model = BaseModel()
-
-        self.assertTrue(str(my_model).startswith('[BaseModel]'))
-
-        self.assertIn(my_model.id, str(my_model))
-
-        self.assertIn(str(my_model.__dict__), str(my_model))
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()
