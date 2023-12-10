@@ -1,43 +1,47 @@
 #!/usr/bin/python3
+"""
+the unittest for the sate module
+"""
+
 import unittest
 from models.state import State
-"""
-the Unittest Module for State class
-"""
+from datetime import datetime
+from models.base_model import BaseModel
+
+class TestState(unittest.TestCase):
+    """
+    the testing of state class
+    that inherits from basemodel
+    """
+    def test_type_of_name(self):
+        state = State()
+        self.assertEqual(type(state.name), str)
 
 
-class TestUser(unittest.TestCase):
-    ''' the Unittest for State class '''
+    def test_ids(self):
+        test1 = State()
+        test2 = State()
+        self.assertNotEqual(test1.id, test2.id)
 
-    def test_object_Instantiation(self):
-        ''' the instantiates class '''
-        self.state = State()
 
-    def testattr(self):
-        ''' the test Class: State attributes '''
-        self.state = State()
-        self.assertTrue(hasattr(self.state, "created_at"))
-        self.assertTrue(hasattr(self.state, "updated_at"))
-        self.assertFalse(hasattr(self.state, "random_attr"))
-        self.assertTrue(hasattr(self.state, "name"))
-        self.assertTrue(hasattr(self.state, "id"))
-        self.assertEqual(self.state.name, "")
-        self.state.name = "WonderLand"
-        self.assertEqual(self.state.name, "WonderLand")
-        self.assertEqual(self.state.__class__.__name__, "State")
+    def test_str_representation(self):
+        state = State()
+        expected = "[State] ({}) {}".format(state.id, state.__dict__)
+        self.assertEqual(state.__str__(), expected)
+    
+    def test_state_save(self):
+        state = State()
+        updated_before_save = state.updated_at
+        state.save()
+        updated_after_save = state.updated_at
+        self.assertNotEqual(updated_before_save, updated_after_save)
+    
+    def test_place_to_dict(self):
+        state = State()
+        state.name = "ISNOTREAL"
 
-    def testsave(self):
-        ''' the testing method: save '''
-        self.state = State()
-        self.state.save()
-        self.assertTrue(hasattr(self.state, "updated_at"))
-
-    def teststr(self):
-        ''' the testing __str__ return format of BaseModel '''
-        self.state = State()
-        s = "[{}] ({}) {}".format(self.state.__class__.__name__,
-                                  str(self.state.id), self.state.__dict__)
-        self.assertEqual(print(s), print(self.state))
-
-if __name__ == '__main__':
-    unittest.main()
+        self.assertIn("id", state.to_dict())
+        self.assertIn("created_at", state.to_dict())
+        self.assertIn("updated_at", state.to_dict())
+        self.assertIn("name", state.to_dict())
+        self.assertIn("__class__", state.to_dict())

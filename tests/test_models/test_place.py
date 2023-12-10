@@ -1,50 +1,63 @@
 #!/usr/bin/python3
+"""
+the unittest for the Place module
+"""
+
 import unittest
+from datetime import datetime
 from models.place import Place
-"""
-the Unittest Module for Place class
-"""
+from models.base_model import BaseModel
 
+class TestPlace(unittest.TestCase):
+    """
+    the unittest for the place class
+    """
+    def test_instances_type(self):
+        place1 = Place()
+        self.assertIs(Place, type(place1))
+        self.assertIsInstance(place1, BaseModel)
+        self.assertIsInstance(place1.id, str)
+        self.assertIsInstance(place1.created_at, datetime)
+        self.assertIsInstance(place1.updated_at, datetime)
+        self.assertIsInstance(place1.name, str)
+        self.assertIsInstance(place1.city_id, str)
+        self.assertIsInstance(place1.user_id, str)
+        self.assertIsInstance(place1.description, str)
+        self.assertIsInstance(place1.number_bathrooms, int)
+        self.assertIsInstance(place1.number_rooms, int)
+        self.assertIsInstance(place1.max_guest, int)
+        self.assertIsInstance(place1.price_by_night, int)
+        self.assertIsInstance(place1.latitude, float)
+        self.assertIsInstance(place1.longitude, float)
+        self.assertIsInstance(place1.amenity_ids, list)
+ 
+    def test_place_str_repr(self):
+        place = Place()
+        str_format = "[Place] ({}) {}".format(place.id, place.__dict__)
+        self.assertEqual(place.__str__(), str_format)
 
-class TestUser(unittest.TestCase):
-    ''' the Unittest for Place class '''
+    def _place_ids(self):
+        place_1 = Place()
+        place_2 = Place()
+        self.assertNotEqual(place_1.id, place_2.id)
 
-    def test_object_Instantiation(self):
-        ''' the instantiates class '''
-        self.place = Place()
+    def test_place_save(self):
+        place_3 = Place()
+        updated_before_save = place_3.updated_at
+        place_3.save()
+        updated_after_save = place_3.updated_at
+        self.assertNotEqual(updated_before_save, updated_after_save)
 
-    def testattr(self):
-        ''' the test Class: Place attributes '''
-        self.place = Place()
-        self.assertTrue(hasattr(self.place, "created_at"))
-        self.assertTrue(hasattr(self.place, "updated_at"))
-        self.assertFalse(hasattr(self.place, "random_attr"))
-        self.assertTrue(hasattr(self.place, "name"))
-        self.assertTrue(hasattr(self.place, "id"))
-        self.assertEqual(self.place.name, "")
-        self.assertEqual(self.place.city_id, "")
-        self.assertEqual(self.place.user_id, "")
-        self.assertEqual(self.place.description, "")
-        self.assertEqual(self.place.number_rooms, 0)
-        self.assertEqual(self.place.number_bathrooms, 0)
-        self.assertEqual(self.place.max_guest, 0)
-        self.assertEqual(self.place.price_by_night, 0)
-        self.assertEqual(self.place.latitude, 0.0)
-        self.assertEqual(self.place.longtude, 0.0)
-        self.assertEqual(self.place.amenity_ids, [])
+    def test_place_to_dict(self):
+        place = Place()
+        place.price_by_night = 500
+        place.max_guest = 2
+        place.number_bathrooms = 1
 
-    def testsave(self):
-        ''' the testing method: save '''
-        self.place = Place()
-        self.place.save()
-        self.assertTrue(hasattr(self.place, "updated_at"))
-
-    def teststr(self):
-        ''' the testing __str__ return format of BaseModel '''
-        self.place = Place()
-        s = "[{}] ({}) {}".format(self.place.__class__.__name__,
-                                  str(self.place.id), self.place.__dict__)
-        self.assertEqual(print(s), print(self.place))
-
-if __name__ == '__main__':
-    unittest.main()
+        self.assertIn("id", place.to_dict())
+        self.assertIn("created_at", place.to_dict())
+        self.assertIn("updated_at", place.to_dict())
+        self.assertIn("price_by_night", place.to_dict())
+        self.assertIn("max_guest", place.to_dict())
+        self.assertIn("number_bathrooms", place.to_dict())
+        self.assertIn("__class__", place.to_dict())

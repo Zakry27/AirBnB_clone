@@ -1,24 +1,33 @@
 #!/usr/bin/python3
+"""
+this defines place module
+"""
 from models.base_model import BaseModel
-"""
-the Module class: Place
-"""
 
 
 class Place(BaseModel):
-    """the definition for class Place"""
-    name = ""
+    """place class
+    attributes:
+    cities id
+    users id
+    places name
+    description of the place
+    num of rooms
+    num of bathrooms
+    max num of guests
+    price by night
+    latitude of the place
+    longitude of place
+    list of ids of the amenity
+    """
     city_id = ""
     user_id = ""
+    name = ""
     description = ""
     number_rooms = 0
     number_bathrooms = 0
     max_guest = 0
     price_by_night = 0
     latitude = 0.0
-    longtude = 0.0
+    longitude = 0.0
     amenity_ids = []
-
-    def __init__(self, *args, **kwargs):
-        """ the constructor method """
-        super().__init__(self, *args, **kwargs)

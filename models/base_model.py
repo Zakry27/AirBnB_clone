@@ -1,78 +1,78 @@
 #!/usr/bin/python3
 """
-the Module base_model
-this Contains Class that defines all common attributes or
-methods for other classes
+this defines the basemodel module
 """
-from uuid import uuid4
-from datetime import datetime
-from models import storage
 import uuid
-import json
-import sys
-import os.path
+from datetime import datetime
+import models
 
 
-class BaseModel():
-    ''' base class for other classes '''
+class BaseModel:
+    """ BaseModel class defines common attributes and methods that can be
+    inherited by other classes in application.
+
+    Attributes:
+        id (str): universally unique identifier (UUID) for object.
+        created_at (datetime): indicating object's creation time.
+        updated_at (datetime): indicating object's last update time.
+
+    Methods:
+        __init__: Initializes a new instance of BaseModel class.
+        __str__: Returns a string representation of object.
+        save: Updates 'updated_at' attribute to current timestamp.
+        to_dict: Converts object to a dictionary format.
+    """
 
     def __init__(self, *args, **kwargs):
-        '''
-        initializes values
-        '''
+        """
+        Initializes new instance of BaseModel class.
+
+        Args:
+            *args: Variable-length argument list.
+            **kwargs: Arbitrary keyword arguments.
+        """
         if kwargs:
-            dtf = '%Y-%m-%dT%H:%M:%S.%f'
-            k_dict = kwargs.copy()
-            del k_dict["__class__"]
-            for key in k_dict:
-                if ("created_at" == key or "updated_at" == key):
-                    k_dict[key] = datetime.strptime(k_dict[key], dtf)
-            self.__dict__ = k_dict
+            for key, value in kwargs.items():
+                if key != "__class__":
+                    if key == "created_at" or key == "updated_at":
+                        date_format = "%Y-%m-%dT%H:%M:%S.%f"
+                        self.__dict__[key] = datetime.strptime(
+                                value, date_format)
+                    else:
+                        self.__dict__[key] = value
         else:
-            self.id = str(uuid4())
+            self.id = str(uuid.uuid4())
             self.created_at = datetime.now()
             self.updated_at = datetime.now()
-            storage.new(self)
+            models.storage.new(self)
 
     def __str__(self):
-        '''
-        print in "[<class name>] (<self.id>) <self.__dict__>" format
-        '''
-        return ('[{}] ({}) {}'.format(
-            self.__class__.__name__,
-            self.id,
-            self.__class__.__dict__))
+        """
+        Returns string representation of object.
+
+        Returns:
+            str: string containing class name, id
+        """
+        return "[{}] ({}) {}".format(
+                self.__class__.__name__, self.id, self.__dict__)
 
     def save(self):
-        '''
-        updates public instance attribute updated_at
-        with current datetime
-        '''
+        """
+        Updates 'updated_at' attribute to current timestamp.
+        """
+
         self.updated_at = datetime.now()
-        storage.save()
+        models.storage.save()
 
     def to_dict(self):
-        '''
-        returns dictionary containing all keysvalues
-        of __dict__ of instance
-        '''
-        dic = {}
-        dic["__class__"] = self.__class__.__name__
-        for k, v in self.__dict__.items():
-            if isinstance(v, (datetime, )):
-                dic[k] = v.isoformat()
-            else:
-                dic[k] = v
-        return dic
+        """
+        Converts object to dictionary format.
 
-    def to_json(self):
-        '''
-        returns json containing all keysvalues
-        of __dict__ of instance
-        '''
-        my_json = self.__dict__.copy()
-        my_json.update({'created_at': self.created_at.strftime(self.dtf)})
-        my_json.update({'__class__': str(self.__class__.__name__)})
-        if hasattr(self, 'updated_at'):
-            my_json.update({'updated_at': self.updated_at.strftime(self.dtf)})
-        return my_json
+        Returns:
+            dict: dictionary representation of object.
+        """
+        obj = self.__dict__.copy()
+        obj['__class__'] = self.__class__.__name__
+        obj['created_at'] = self.created_at.isoformat()
+        obj['updated_at'] = self.updated_at.isoformat()
+        return obj

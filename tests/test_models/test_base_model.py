@@ -1,61 +1,55 @@
 #!/usr/bin/python3
+"""
+the unittest for the basemodel module
+"""
+
 import unittest
+from datetime import datetime
+import time
 from models.base_model import BaseModel
-"""
-the Unittest Module for BaseModel class
-"""
 
 
-class TestUser(unittest.TestCase):
-    ''' the Unittest for BaseModel class '''
+class TestBaseModel(unittest.TestCase):
+    """the Testing BaseModel class"""
 
-    def test_object_Instantiation(self):
-        ''' the instantiates class '''
-        self.basemodel = BaseModel()
+    def test_instances_type(self):
+        obj = BaseModel()
+        self.assertIs(BaseModel, type(obj))
+        self.assertIsInstance(obj.id, str)
+        self.assertIsInstance(obj.created_at, datetime)
+        self.assertIsInstance(obj.updated_at, datetime)
+    
+    def test_id_uniqueness(self):
+        obj1 = BaseModel()
+        obj2 = BaseModel()
+        self.assertNotEqual(obj1.id, obj2.id)
 
-    def test_checking_for_functions(self):
-        self.assertIsNotNone(BaseModel.__doc__)
-        self.assertIsNotNone(BaseModel.save.__doc__)
-        self.assertIsNotNone(BaseModel.to_dict.__doc__)
+    def test_created_at_two_timestamps(self):
+        obj3 = BaseModel()
+        time.sleep(0.03)
+        obj4 = BaseModel()
+        self.assertNotEqual(obj3.created_at, obj4.created_at)
 
-    def testattr(self):
-        ''' the test Class: User attributes '''
-        self.basemodel = BaseModel()
-        self.assertTrue(hasattr(self.basemodel, "created_at"))
-        self.assertTrue(hasattr(self.basemodel, "updated_at"))
-        self.assertFalse(hasattr(self.basemodel, "random_attr"))
-        self.assertFalse(hasattr(self.basemodel, "name"))
-        self.assertTrue(hasattr(self.basemodel, "id"))
-        self.basemodel.name = "Alice"
-        self.basemodel.age = "44"
-        self.assertTrue(hasattr(self.basemodel, "name"))
-        self.assertTrue(hasattr(self.basemodel, "age"))
-        delattr(self.basemodel, "name")
-        self.assertFalse(hasattr(self.basemodel, "name"))
-        delattr(self.basemodel, "age")
-        self.assertFalse(hasattr(self.basemodel, "age"))
-        self.assertEqual(self.basemodel.__class__.__name__, "BaseModel")
-
-    def testsave(self):
-        ''' the testing method: save '''
-        self.basemodel = BaseModel()
-        self.basemodel.save()
-        self.assertTrue(hasattr(self.basemodel, "updated_at"))
-
-    def teststr(self):
-        ''' the testing __str__ return format of BaseModel '''
-        self.basemodel = BaseModel()
-        s = "[{}] ({}) {}".format(self.basemodel.__class__.__name__,
-                                  str(self.basemodel.id),
-                                  self.basemodel.__dict__)
-        self.assertEqual(print(s), print(self.basemodel))
+    def test_str_format(self):
+        obj = BaseModel()
+        str_format = "[BaseModel] ({}) {}".format(obj.id, obj.__dict__)
+        self.assertEqual(obj.__str__(), str_format)
+    
+    def test_save(self):
+        obj = BaseModel()
+        updated_before_save = obj.updated_at
+        obj.save()
+        updated_after_save = obj.updated_at
+        self.assertNotEqual(updated_before_save, updated_after_save)
 
     def test_to_dict(self):
-        base1 = BaseModel()
-        base1_dict = base1.to_dict()
-        self.assertEqual(base1.__class__.__name__, 'BaseModel')
-        self.assertIsInstance(base1_dict['created_at'], str)
-        self.assertIsInstance(base1_dict['updated_at'], str)
-
-if __name__ == '__main__':
-    unittest.main()
+        obj = BaseModel()
+        obj.name = "My First Model"
+        obj.my_number = 78
+        my_dict = obj.to_dict()
+        self.assertIsInstance(my_dict, dict)
+        self.assertIn("name", my_dict)
+        self.assertIn("my_number", my_dict)
+        self.assertIn("created_at", my_dict)
+        self.assertIn("updated_at", my_dict)
+        self.assertIn("__class__", my_dict)    

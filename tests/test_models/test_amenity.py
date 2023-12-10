@@ -1,40 +1,51 @@
 #!/usr/bin/python3
+"""
+the unittest for the amenity module
+"""
+from datetime import datetime
 import unittest
+from models.base_model import BaseModel
 from models.amenity import Amenity
-"""
-the Unittest Module for Amenity class
-"""
 
 
 class TestAmenity(unittest.TestCase):
-    ''' the Unittest for Amenity class '''
+    """
+    the unittesting the amenity class
+    """
 
-    def test_object_Instantiation(self):
-        ''' instantiate class '''
-        self.amenity = Amenity()
+    def test_name(self):
+        amenity1 = Amenity()
+        self.assertIsInstance(amenity1.name, str)
 
-    def testattr(self):
-        ''' the test Class: Amenity attributes '''
-        self.amenity = Amenity()
-        self.assertTrue(hasattr(self.amenity, "created_at"))
-        self.assertTrue(hasattr(self.amenity, "updated_at"))
-        self.assertFalse(hasattr(self.amenity, "random_attr"))
-        self.assertTrue(hasattr(self.amenity, "name"))
-        self.assertTrue(hasattr(self.amenity, "id"))
-        self.assertEqual(self.amenity.__class__.__name__, "Amenity")
 
-    def testsave(self):
-        ''' the testing method: save '''
-        self.amenity = Amenity()
-        self.amenity.save()
-        self.assertTrue(hasattr(self.amenity, "updated_at"))
+    def test_ids(self):
+        amenity1 = Amenity()
+        amenity2 = Amenity()
+        self.assertNotEqual(amenity1.id, amenity2.id)
 
-    def teststr(self):
-        ''' the testing __str__ return format of Amenity '''
-        self.amenity = Amenity()
-        s = "[{}] ({}) {}".format(self.amenity.__class__.__name__,
-                                  str(self.amenity.id), self.amenity.__dict__)
-        self.assertEqual(print(s), print(self.amenity))
+    def test_instance_types(self):
+        amenity = Amenity()
+        self.assertIsInstance(amenity, BaseModel)
+        self.assertIsInstance(amenity.id, str)
+        self.assertIsInstance(amenity.created_at, datetime)
+        self.assertIsInstance(amenity.updated_at, datetime)
+        self.assertIsInstance(amenity.name, str)
 
-if __name__ == '__main__':
-    unittest.main()
+    def test_str_repre(self):
+        amenity = Amenity()
+        expected = "[Amenity] ({}) {}".format(amenity.id, amenity.__dict__)
+        self.assertEqual(amenity.__str__(), expected)
+
+
+    def test_amenity_to_dict(self):
+        amenity = Amenity()
+        T_format = "%Y-%m-%dT%H:%M:%S.%f"
+        amenity.name = "AMN"
+        amenity.number = 16
+        self.assertIn("name", amenity.to_dict())
+        self.assertIn("number", amenity.to_dict())
+        self.assertIn("id", amenity.to_dict())
+        self.assertIn("created_at", amenity.to_dict())
+        self.assertIn("updated_at", amenity.to_dict())
+        self.assertIn("__class__", amenity.to_dict())
+        self.assertEqual(amenity.to_dict()["created_at"], amenity.created_at.strftime(T_format))

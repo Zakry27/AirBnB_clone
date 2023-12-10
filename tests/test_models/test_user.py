@@ -1,57 +1,58 @@
 #!/usr/bin/python3
+"""
+the unittest for the Place module
+"""
 
 import unittest
-import os
+from datetime import datetime
 from models.user import User
 from models.base_model import BaseModel
 
+class TestPlace(unittest.TestCase):
+    """
+    the unittest for the place class
+    """
+    def test_instances_type(self):
+        user_1 = User()
+        self.assertIs(User, user_1)
+        self.assertIsInstance(user_1.id, str)
+        self.assertIsInstance(user_1.first_name, datetime)
+        self.assertIsInstance(user_1.last_name, datetime)
+        self.assertIsInstance(user_1.email, datetime)
+        self.assertIsInstance(user_1.password, datetime)
+        self.assertIsInstance(user_1.updated_at, datetime)
+        self.assertIsInstance(user_1.created_at, datetime)
+    
+    def test_rev_str_repr(self):
+        user_2 = User()
+        str_format = "[User] ({}) {}".format(user_2.id, user_2.__dict__)
+        self.assertEqual(user_2.__str__(), str_format)
 
-class TestUser(unittest.TestCase):
+    def _users_ids(self):
+        user_1 = User()
+        user_2 = User()
+        self.assertNotEqual(user_1.id, user_2.id)
 
-    @classmethod
-    def setUpClass(cls):
-        cls.my_user = User()
-        cls.my_user.first_name = "Betty"
-        cls.my_user.last_name = "alx"
-        cls.my_user.email = "airbnb@alxshool.com"
-        cls.my_user.password = "root"
+    def test_place_save(self):
+        user_1 = User()
+        updated_before_save = user_1.updated_at
+        user_1.save()
+        updated_after_save = user_1.updated_at
+        self.assertNotEqual(updated_before_save, updated_after_save)
 
-    @classmethod
-    def tearDownClass(cls):
-        del cls.my_user
-        try:
-            os.remove("file.json")
-        except FileNotFoundError:
-            pass
+    def test_place_to_dict(self):
+        user_one = User()
 
-    def test_is_subclass(self):
-        self.assertTrue(issubclass(self.my_user.__class__, BaseModel), True)
+        user_one.first_name = "zakaria"
+        user_one.last_name = "kerzak"
+        user_one.email = "zakaria.kerzak@we.com"
+        user_one.password = "notyourbusinessman"
 
-    def test_checking_for_functions(self):
-        self.assertIsNotNone(User.__doc__)
-
-    def test_has_attributes(self):
-        self.assertTrue('email' in self.my_user.__dict__)
-        self.assertTrue('id' in self.my_user.__dict__)
-        self.assertTrue('created_at' in self.my_user.__dict__)
-        self.assertTrue('updated_at' in self.my_user.__dict__)
-        self.assertTrue('password' in self.my_user.__dict__)
-        self.assertTrue('first_name' in self.my_user.__dict__)
-        self.assertTrue('last_name' in self.my_user.__dict__)
-
-    def test_attributes_are_strings(self):
-        self.assertEqual(type(self.my_user.email), str)
-        self.assertEqual(type(self.my_user.password), str)
-        self.assertEqual(type(self.my_user.first_name), str)
-        self.assertEqual(type(self.my_user.first_name), str)
-
-    def test_save(self):
-        self.my_user.save()
-        self.assertNotEqual(self.my_user.created_at, self.my_user.updated_at)
-
-    def test_to_dict(self):
-        self.assertEqual('to_dict' in dir(self.my_user), True)
-
-
-if __name__ == "__main__":
-    unittest.main()
+        self.assertIn("id", user_one.to_dict())
+        self.assertIn("first_name", user_one.to_dict())
+        self.assertIn("last_name", user_one.to_dict())
+        self.assertIn("email", user_one.to_dict())
+        self.assertIn("password", user_one.to_dict())
+        self.assertIn("created_at", user_one.to_dict())
+        self.assertIn("updated_at", user_one.to_dict())
+        self.assertIn("__class__", user_one.to_dict())

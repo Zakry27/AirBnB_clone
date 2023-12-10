@@ -1,46 +1,57 @@
 #!/usr/bin/python3
+"""
+the unittest for the city module
+"""
+
 import unittest
+from datetime import datetime
 from models.city import City
-"""
-the Unittest Module for City class
-"""
+from models.base_model import BaseModel
+
+class TestCity(unittest.TestCase):
+    """
+    the unittest for the city class
+    """
+
+    def test_ids(self):
+        city1 = City()
+        city2 = City()
+        self.assertNotEqual(city1.id, city2.id)
+
+    def test_str_representation(self):
+        city = City()
+        expected = "[City] ({}) {}".format(city.id, city.__dict__)
+        self.assertEqual(city.__str__(), expected)
 
 
-class TestUser(unittest.TestCase):
-    ''' the Unittest for City class '''
+    def test_instances(self):
+        city = City()
+        self.assertIs(type(city), City)
+        self.assertIsInstance(city.created_at, datetime)
+        self.assertIsInstance(city.updated_at, datetime)
+        self.assertIsInstance(city.name, str)
+        self.assertIsInstance(city.state_id, str)
+        self.assertIsInstance(city.id, str)
 
-    def test_object_Instantiation(self):
-        ''' the instantiates class '''
-        self.city = City()
+    def test_city_save(self):
+        city = City()
+        updated_before_save = city.updated_at
+        city.save()
+        updated_after_save = city.updated_at
+        self.assertNotEqual(updated_before_save, updated_after_save)
 
-    def testattr(self):
-        ''' the test Class: City attributes '''
-        self.city = City()
-        self.assertTrue(hasattr(self.city, "created_at"))
-        self.assertTrue(hasattr(self.city, "updated_at"))
-        self.assertFalse(hasattr(self.city, "random_attr"))
-        self.assertTrue(hasattr(self.city, "name"))
-        self.assertTrue(hasattr(self.city, "id"))
-        self.assertEqual(self.city.name, "")
-        self.assertEqual(self.city.state_id, "")
-        self.city.name = "WonderLand"
-        self.city.state_id = "Won67L0nd"
-        self.assertEqual(self.city.name, "WonderLand")
-        self.assertEqual(self.city.state_id, "Won67L0nd")
-        self.assertEqual(self.city.__class__.__name__, "City")
+    def test_city_to_dict(self):
+        city = City()
+        T_format = "%Y-%m-%dT%H:%M:%S.%f"
+        city.name = "Intropinko"
+        city.number = 7
 
-    def testsave(self):
-        ''' the testing method: save '''
-        self.city = City()
-        self.city.save()
-        self.assertTrue(hasattr(self.city, "updated_at"))
+        self.assertIn("name", city.to_dict())
+        self.assertIn("number", city.to_dict())
+        self.assertIn("id", city.to_dict())
+        self.assertIn("created_at", city.to_dict())
+        self.assertIn("updated_at", city.to_dict())
+        self.assertIn("__class__", city.to_dict())
+        self.assertEqual(city.to_dict()["created_at"], city.created_at.strftime(T_format))
 
-    def teststr(self):
-        ''' the testing __str__ return format of BaseModel '''
-        self.city = City()
-        s = "[{}] ({}) {}".format(self.city.__class__.__name__,
-                                  str(self.city.id), self.city.__dict__)
-        self.assertEqual(print(s), print(self.city))
-
-if __name__ == '__main__':
-    unittest.main()
+    

@@ -1,41 +1,46 @@
 #!/usr/bin/python3
+"""
+the unittest for the Place module
+"""
+
 import unittest
+from datetime import datetime
 from models.review import Review
-"""
-the Unittest Module for Review class
-"""
+from models.base_model import BaseModel
 
+class TestReview(unittest.TestCase):
+    """
+    the unittest for the review class
+    """
+    def test_instances_type(self):
+        review = Review()
+        self.assertIs(Review, type(review))
+        self.assertIsInstance(review.id, str)
+        self.assertIsInstance(review.created_at, datetime)
+        self.assertIsInstance(review.updated_at, datetime)
 
-class TestUser(unittest.TestCase):
-    ''' the Unittest for Review class '''
+    def test_rev_str_repr(self):
+        review = Review()
+        str_format = "[Review] ({}) {}".format(review.id, review.__dict__)
+        self.assertEqual(review.__str__(), str_format)
 
-    def test_object_Instantiation(self):
-        ''' the instantiates class '''
-        self.review = Review()
+    def test_rev_save(self):
+        review = Review()
+        updated_before_save = review.updated_at
+        review.save()
+        updated_after_save = review.updated_at
+        self.assertNotEqual(updated_before_save, updated_after_save)
 
-    def testattr(self):
-        ''' the test Class: Review attributes '''
-        self.review = Review()
-        self.assertTrue(hasattr(self.review, "created_at"))
-        self.assertTrue(hasattr(self.review, "updated_at"))
-        self.assertFalse(hasattr(self.review, "random_attr"))
-        self.assertTrue(hasattr(self.review, "text"))
-        self.assertTrue(hasattr(self.review, "id"))
-        self.assertEqual(self.review.text, "")
-        self.assertEqual(self.review.__class__.__name__, "Review")
+    def test_rev_to_dict(self):
+        review = Review()
+        review.text = "Amazing place"
+        self.assertIn("text", review.to_dict())
+        self.assertIn("id", review.to_dict())
+        self.assertIn("created_at", review.to_dict())
+        self.assertIn("updated_at", review.to_dict())
+        self.assertIn("__class__", review.to_dict())
 
-    def testsave(self):
-        ''' the testing method: save '''
-        self.review = Review()
-        self.review.save()
-        self.assertTrue(hasattr(self.review, "updated_at"))
-
-    def teststr(self):
-        ''' the testing __str__ return format of BaseModel '''
-        self.review = Review()
-        s = "[{}] ({}) {}".format(self.review.__class__.__name__,
-                                  str(self.review.id), self.review.__dict__)
-        self.assertEqual(print(s), print(self.review))
-
-if __name__ == '__main__':
-    unittest.main()
+    def test_ids(self):
+        review1 = Review()
+        review2 = Review()
+        self.assertEqual(review1.id, review2.id)
